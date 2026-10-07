@@ -26,9 +26,8 @@ environment_variables:
   GUIDE_ENGINE:
     default: "mkdocs"
     description: >-
-      Which static site generator to build the guide with — mkdocs (Material
-      for MkDocs) or zensical. Both are fully supported; the default is just
-      a prefilled value.
+      Choices: "mkdocs" or "zensical". Which static site generator to build the guide with — mkdocs (Material
+      for MkDocs) or zensical.
     required: true
 
 runtimes:
