@@ -1,0 +1,75 @@
+name: Lab Guide AMP
+description: >-
+  Serve a Hands-on-Lab guide (written in Material for MkDocs or Zensical) as a
+  running static site inside Cloudera AI. Ship your course content baked into
+  this repo, or upload it after launch — either way, build once (or rebuild
+  any time) and the guide is live for workshop attendees with no login
+  required.
+author: "Jim Enright (@jimright)"
+date: "2026-10-07"
+specification_version: "1.0"
+prototype_version: "1.0"
+
+environment_variables:
+  LAB_GUIDE_SRC_DIR:
+    default: "lab_guide"
+    description: >-
+      Path, relative to the project root, to the folder containing your lab
+      guide's markdown and its mkdocs.yml or zensical.toml config file. Point
+      this at the shipped example, or at a folder you upload content into
+      yourself after launch (e.g. via the Workbench Project Files UI) if your
+      content lives somewhere Cloudera AI can't reach directly.
+    required: true
+  GUIDE_ENGINE:
+    default: "mkdocs"
+    description: >-
+      Which static site generator to build the guide with — mkdocs (Material
+      for MkDocs) or zensical. Both are fully supported; the default is just
+      a prefilled value.
+    required: true
+
+runtimes:
+  - editor: PBJ Workbench
+    kernel: Python 3.11
+    edition: Standard
+
+tasks:
+  - type: create_job
+    name: Install dependencies
+    entity_label: install_deps
+    script: cml/install_deps.py
+    arguments: ""
+    short_summary: Install mkdocs-material and zensical.
+    kernel: python3
+    cpu: 1
+    memory: 2
+
+  - type: run_job
+    entity_label: install_deps
+    short_summary: Running dependency installation.
+
+  - type: create_job
+    name: Build lab guide site
+    entity_label: build_lab_guide
+    script: cml/build_lab_guide.py
+    arguments: ""
+    short_summary: Build the lab guide with the selected engine into a fixed output path.
+    kernel: python3
+    cpu: 1
+    memory: 2
+
+  - type: run_job
+    entity_label: build_lab_guide
+    short_summary: >-
+      Building the lab guide. If your content hasn't been uploaded yet
+      (manual-upload path), this step fails with instructions — rerun it
+      from the Jobs page once the content is in place.
+
+  - type: start_application
+    name: Lab Guide
+    subdomain: lab-guide
+    script: app/serve_lab_guide.py
+    kernel: python3
+    cpu: 1
+    memory: 2
+    bypass_authentication: true
