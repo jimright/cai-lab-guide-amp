@@ -15,13 +15,16 @@ environment_variables:
     default: "lab_guide"
     description: >-
       Path, relative to the project root, to the folder containing your lab
-      guide content. Its mkdocs.yml or zensical.toml config file is found by
+      guide content. For GUIDE_ENGINE=mkdocs, mkdocs.yml is found by
       recursive search, so it can live directly inside this folder or in any
       subfolder beneath it (e.g. instructor/mkdocs/mkdocs.yml) -- exactly one
-      matching config file must exist under this path. Point this at the
-      shipped example, or at a folder you upload content into yourself after
-      launch (e.g. via the Workbench Project Files UI) if your content lives
-      somewhere Cloudera AI can't reach directly.
+      matching config file must exist under this path. For
+      GUIDE_ENGINE=zensical, zensical.toml must sit directly inside this
+      folder (no recursive search -- Zensical always expects its config at
+      the top). Point this at the shipped example, or at a folder you upload
+      content into yourself after launch (e.g. via the Workbench Project
+      Files UI) if your content lives somewhere Cloudera AI can't reach
+      directly.
     required: true
   GUIDE_ENGINE:
     default: "mkdocs"
