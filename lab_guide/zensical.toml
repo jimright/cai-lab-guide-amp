@@ -1,7 +1,7 @@
 [project]
 site_name = "Lab Guide AMP Example"
-docs_dir = "docs"
-site_dir = "site"
+docs_dir = "content"
+site_dir = "./build"
 
 nav = [
   { "Home" = "index.md" },

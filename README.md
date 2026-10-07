@@ -19,7 +19,7 @@ There are two supported ways to get your lab guide's markdown + config into the 
 ### Path A: Fork and commit your content
 
 1. Fork this repo.
-2. Replace the contents of `lab_guide/` with your own `docs/*.md` and your own `mkdocs.yml` and/or `zensical.toml`.
+2. Replace the contents of `lab_guide/` with your own markdown and your own `mkdocs.yml` and/or `zensical.toml`. The config doesn't need to sit at the top level of `lab_guide/` — it's found by recursive search — so you can keep whatever nesting your course repo already uses (the shipped example mirrors a real course repo's `instructor/mkdocs/mkdocs.yml` + sibling `content/` layout; see Repo layout below).
 3. Commit and push.
 4. Import your fork as a Custom AMP (see below). Your content is present the moment the project is cloned, so the build job succeeds on its first run.
 
@@ -71,21 +71,28 @@ Once you've validated your fork, follow Cloudera's AMP catalog submission proces
 ```
 .project-metadata.yaml
 README.md
-requirements.txt                  # mkdocs-material + zensical, both always installed
+requirements.txt                  # mkdocs/mkdocs-material + common plugins + zensical, always installed
 cml/
   install_deps.py                 # create_job/run_job: pip install -r requirements.txt
   build_lab_guide.py              # create_job/run_job: build the selected engine's site
 app/
   serve_lab_guide.py              # start_application: serve the fixed build output dir
 lab_guide/                        # shipped example content (Path A demo, both engines)
-  docs/
+  instructor/                      # mirrors a real course repo's nesting (e.g. hol-004-telco-churn-data-lifecycle)
+    mkdocs/
+      mkdocs.yml                  # docs_dir: '../../content', site_dir: './build'
+  zensical.toml                    # docs_dir = "content", site_dir = "./build" -- always top-level, see note below
+  content/
     index.md
     module-1-setup.md
     module-2-exercise.md
-  mkdocs.yml
-  zensical.toml
 adr/
   0001-lab-guide-amp-architecture.md
 ref/
   serve_lab_guide.py              # untouched, left as original reference
 ```
+
+Note: `mkdocs.yml` can live nested anywhere under `LAB_GUIDE_SRC_DIR` (it's
+found by recursive search), but `zensical.toml` must always sit directly at
+the top of `LAB_GUIDE_SRC_DIR` — Zensical always looks for its config
+there, unlike MkDocs' `-f`-overridable path.

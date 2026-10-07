@@ -80,6 +80,31 @@ def resolve_config_path(src_dir_rel: str, engine: str) -> pathlib.Path:
             f"CML CLI), then rerun this job from the Jobs page."
         )
 
+    if engine == "zensical":
+        # Unlike mkdocs.yml, zensical.toml is not found via -f from an
+        # arbitrary directory -- Zensical always expects its config
+        # directly at the top of the project, so there's no recursive
+        # search here: look only at src_dir itself.
+        config_path = src_dir / config_filename
+        if not config_path.is_file():
+            fail(
+                f"Could not find '{config_filename}' directly inside "
+                f"'{src_dir_rel}'.\n"
+                f"Zensical always expects its config at the top of "
+                f"LAB_GUIDE_SRC_DIR (unlike mkdocs.yml, it is never found "
+                f"by recursive search), so this is safe to rerun once the "
+                f"problem below is fixed:\n"
+                f"  - Wrong setting: if your lab guide content lives in a "
+                f"different folder, or uses the other engine, fix "
+                f"LAB_GUIDE_SRC_DIR and/or GUIDE_ENGINE in the project's "
+                f"environment variables to match, then rerun this job.\n"
+                f"  - Nested or not uploaded yet: move '{config_filename}' "
+                f"to the top of '{src_dir_rel}' (or upload it there via "
+                f"the Workbench Project Files UI, scp, or the CML CLI), "
+                f"then rerun this job from the Jobs page."
+            )
+        return config_path
+
     matches = find_config_matches(src_dir, config_filename)
 
     if not matches:
