@@ -1,11 +1,17 @@
 """Build the lab guide (mkdocs or zensical) into a fixed output location.
 
-Reads LAB_GUIDE_SRC_DIR and GUIDE_ENGINE, builds the configured engine's
-site, and copies the result to a fixed path (<project root>/lab_guide_site)
-so app/serve_lab_guide.py never has to know which engine produced it. This
-is what lets Path B (content uploaded after project creation) "just work":
-upload content, rerun this job, and the already-running app picks up the
-new build with no restart.
+Reads LAB_GUIDE_SRC_DIR and GUIDE_ENGINE, searches recursively under
+LAB_GUIDE_SRC_DIR for the engine's config file (mkdocs.yml or
+zensical.toml) rather than requiring it directly inside LAB_GUIDE_SRC_DIR
+-- real course repos often nest it a few levels down (e.g.
+instructor/mkdocs/mkdocs.yml, with content living elsewhere in the same
+tree) -- builds the configured engine's site from wherever that config
+file was found, and copies the result to a fixed path
+(<project root>/lab_guide_site) so app/serve_lab_guide.py never has to
+know which engine produced it or where its config lived. This is what
+lets Path B (content uploaded after project creation) "just work": upload
+content, rerun this job, and the already-running app picks up the new
+build with no restart.
 """
 import os
 import pathlib
@@ -39,6 +45,16 @@ def get_env():
     return src_dir_rel, engine
 
 
+def find_config_matches(src_dir: pathlib.Path, config_filename: str) -> list[pathlib.Path]:
+    """Find config_filename anywhere under src_dir, skipping dot-directories."""
+    matches = []
+    for dirpath, dirnames, filenames in os.walk(src_dir):
+        dirnames[:] = [d for d in dirnames if not d.startswith(".")]
+        if config_filename in filenames:
+            matches.append(pathlib.Path(dirpath) / config_filename)
+    return sorted(matches)
+
+
 def resolve_config_path(src_dir_rel: str, engine: str) -> pathlib.Path:
     if engine not in ENGINE_CONFIG_FILENAMES:
         fail(
@@ -49,23 +65,53 @@ def resolve_config_path(src_dir_rel: str, engine: str) -> pathlib.Path:
 
     config_filename = ENGINE_CONFIG_FILENAMES[engine]
     src_dir = PROJECT_ROOT / src_dir_rel
-    config_path = src_dir / config_filename
 
-    if not src_dir.is_dir() or not config_path.is_file():
+    if not src_dir.is_dir():
         fail(
-            f"Could not find '{config_filename}' in '{src_dir_rel}'.\n"
+            f"'{src_dir_rel}' does not exist under the project root.\n"
+            f"This job is safe to rerun once the problem below is fixed:\n"
+            f"  - Wrong setting: if your lab guide content lives in a "
+            f"different folder, fix LAB_GUIDE_SRC_DIR in the project's "
+            f"environment variables to match, then rerun this job.\n"
+            f"  - Not uploaded yet: if you're following the manual-upload "
+            f"path, upload your lab guide content (including a "
+            f"'{config_filename}' somewhere underneath it) into "
+            f"'{src_dir_rel}' via the Workbench Project Files UI (or scp / "
+            f"CML CLI), then rerun this job from the Jobs page."
+        )
+
+    matches = find_config_matches(src_dir, config_filename)
+
+    if not matches:
+        fail(
+            f"Could not find '{config_filename}' anywhere under "
+            f"'{src_dir_rel}'.\n"
             f"This job is safe to rerun once the problem below is fixed:\n"
             f"  - Wrong setting: if your lab guide content lives in a "
             f"different folder, or uses the other engine, fix "
             f"LAB_GUIDE_SRC_DIR and/or GUIDE_ENGINE in the project's "
             f"environment variables to match, then rerun this job.\n"
             f"  - Not uploaded yet: if you're following the manual-upload "
-            f"path, upload your markdown and '{config_filename}' into "
-            f"'{src_dir_rel}' via the Workbench Project Files UI (or scp / "
-            f"CML CLI), then rerun this job from the Jobs page."
+            f"path, upload your markdown and '{config_filename}' anywhere "
+            f"under '{src_dir_rel}' (e.g. "
+            f"'{src_dir_rel}/instructor/mkdocs/{config_filename}', with the "
+            f"content itself elsewhere under '{src_dir_rel}') via the "
+            f"Workbench Project Files UI (or scp / CML CLI), then rerun "
+            f"this job from the Jobs page."
         )
 
-    return config_path
+    if len(matches) > 1:
+        listed = "\n".join(
+            f"  - {m.relative_to(PROJECT_ROOT)}" for m in matches
+        )
+        fail(
+            f"Found multiple '{config_filename}' files under "
+            f"'{src_dir_rel}':\n{listed}\n"
+            f"Narrow LAB_GUIDE_SRC_DIR to the one directory tree that "
+            f"should be built, then rerun this job."
+        )
+
+    return matches[0]
 
 
 def read_site_dir(config_path: pathlib.Path, engine: str) -> str:

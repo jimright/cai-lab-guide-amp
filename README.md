@@ -9,7 +9,7 @@ login required.
 The AMP runs a short pipeline of CML Jobs, then starts an application:
 
 1. **Install dependencies** — installs both `mkdocs-material` and `zensical`, so either engine is available.
-2. **Build lab guide site** — reads `LAB_GUIDE_SRC_DIR` and `GUIDE_ENGINE`, builds the configured engine's site, and copies the result to a fixed path (`/home/cdsw/lab_guide_site`). This fixed path decouples the serving app from engine-specific output directories, so rerunning this job — after switching engines, or after uploading content — never requires restarting the app.
+2. **Build lab guide site** — reads `LAB_GUIDE_SRC_DIR` and `GUIDE_ENGINE`, searches recursively under `LAB_GUIDE_SRC_DIR` for the matching config file (`mkdocs.yml` or `zensical.toml` — it doesn't have to sit directly inside `LAB_GUIDE_SRC_DIR`, so a real course repo's `instructor/mkdocs/mkdocs.yml` works as-is), builds the engine's site from wherever that config file was found, and copies the result to a fixed path (`/home/cdsw/lab_guide_site`). This fixed path decouples the serving app from engine-specific output directories, so rerunning this job — after switching engines, or after uploading content — never requires restarting the app.
 3. **Lab Guide** (application) — serves `/home/cdsw/lab_guide_site`. If nothing has been built yet, it shows a "guide not built yet" page instead of an error; once a build succeeds, the already-running app serves the real content immediately.
 
 ## Getting your content in
@@ -32,7 +32,7 @@ directly — a Google Doc export, an internal-only repo, etc.
 
 1. Import this AMP as-is (optionally setting `LAB_GUIDE_SRC_DIR` to a different folder name at launch).
 2. The first run of the **Build lab guide site** job is *expected to fail* — this is normal, not a bug. It fails with a message telling you what to fix.
-3. Get your content onto your machine, then upload your markdown and `mkdocs.yml`/`zensical.toml` into `LAB_GUIDE_SRC_DIR` via the Workbench's Project Files UI (drag-and-drop), `scp`, the CML CLI, or a Session with filesystem access.
+3. Get your content onto your machine, then upload it into `LAB_GUIDE_SRC_DIR` via the Workbench's Project Files UI (drag-and-drop), `scp`, the CML CLI, or a Session with filesystem access — including your `mkdocs.yml`/`zensical.toml` *somewhere* under `LAB_GUIDE_SRC_DIR` (it's found by recursive search, so e.g. uploading a whole repo whose config lives at `instructor/mkdocs/mkdocs.yml` works unmodified; just make sure only one matching config file ends up under `LAB_GUIDE_SRC_DIR`).
 4. Rerun the **Build lab guide site** job from the Jobs page.
 5. The already-running **Lab Guide** application starts serving your real content immediately — no restart needed.
 
@@ -45,7 +45,7 @@ switch engines at any time and just rerun the **Build lab guide site** job (no n
 
 | Variable            | Default     | Description |
 | -------------------- | ----------- | ------------ |
-| `LAB_GUIDE_SRC_DIR`  | `lab_guide` | Path, relative to the project root, to the folder containing your lab guide's markdown and its `mkdocs.yml` or `zensical.toml`. |
+| `LAB_GUIDE_SRC_DIR`  | `lab_guide` | Path, relative to the project root, to the folder containing your lab guide content. Its `mkdocs.yml`/`zensical.toml` can live directly inside this folder or in any subfolder beneath it (found by recursive search) — exactly one matching config file must exist under this path. |
 | `GUIDE_ENGINE`       | `mkdocs`    | Which static site generator to build with — `mkdocs` or `zensical`. |
 
 ## Importing this repo as a Custom AMP in CAI
