@@ -1,2 +1,7 @@
-mkdocs-material
+mkdocs>=1.3.0
+mkdocs-material>=8.2.16
+mkdocs-markdownextradata-plugin>=0.2.5
+mkdocs-glightbox>=0.2.1
+mkdocs-same-dir
+mkdocs-macros-plugin
 zensical

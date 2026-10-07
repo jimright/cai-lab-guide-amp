@@ -114,10 +114,26 @@ def resolve_config_path(src_dir_rel: str, engine: str) -> pathlib.Path:
     return matches[0]
 
 
+class _MkdocsYamlLoader(yaml.SafeLoader):
+    """SafeLoader that tolerates mkdocs.yml's Python-object tags.
+
+    Material for MkDocs configs commonly reference Python objects (e.g.
+    pymdownx.emoji's `emoji_index: !!python/name:material.extensions.emoji.twemoji`).
+    We only need top-level scalar keys like site_dir here -- not to actually
+    resolve those objects -- so each one is read as a harmless placeholder
+    instead of making SafeLoader raise.
+    """
+
+
+_MkdocsYamlLoader.add_multi_constructor(
+    "tag:yaml.org,2002:python/", lambda loader, suffix, node: None
+)
+
+
 def read_site_dir(config_path: pathlib.Path, engine: str) -> str:
     if engine == "mkdocs":
         with open(config_path, "r") as f:
-            data = yaml.safe_load(f) or {}
+            data = yaml.load(f, Loader=_MkdocsYamlLoader) or {}
         return data.get("site_dir") or "site"
     else:  # zensical
         with open(config_path, "rb") as f:
