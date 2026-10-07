@@ -1,0 +1,10 @@
+[project]
+site_name = "Lab Guide AMP Example"
+docs_dir = "docs"
+site_dir = "site"
+
+nav = [
+  { "Home" = "index.md" },
+  { "Module 1: Setup" = "module-1-setup.md" },
+  { "Module 2: Exercise" = "module-2-exercise.md" },
+]
