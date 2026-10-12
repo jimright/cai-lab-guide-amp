@@ -30,8 +30,8 @@ environment_variables:
     default: "mkdocs"
     description: >-
       Which static site generator to build the guide with. Enter mkdocs
-      (Material for MkDocs) or zensical.
-    required: true
+      (Material for MkDocs) or zensical. Defaults to mkdocs if left blank.
+    required: false
 
 runtimes:
   - editor: PBJ Workbench

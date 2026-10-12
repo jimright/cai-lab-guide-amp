@@ -41,7 +41,7 @@ def fail(message: str) -> None:
 
 def get_env():
     src_dir_rel = os.environ.get("LAB_GUIDE_SRC_DIR", "lab_guide")
-    engine = os.environ.get("GUIDE_ENGINE", "mkdocs").strip().lower()
+    engine = (os.environ.get("GUIDE_ENGINE") or "mkdocs").strip().lower()
     return src_dir_rel, engine
 
 
