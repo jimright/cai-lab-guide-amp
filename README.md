@@ -9,7 +9,7 @@ login required.
 The AMP runs a short pipeline of CML Jobs, then starts an application:
 
 1. **Install dependencies** — installs both `mkdocs-material` and `zensical`, so either engine is available.
-2. **Build lab guide site** — reads `LAB_GUIDE_SRC_DIR` and `GUIDE_ENGINE`, searches recursively under `LAB_GUIDE_SRC_DIR` for the matching config file (`mkdocs.yml` or `zensical.toml` — it doesn't have to sit directly inside `LAB_GUIDE_SRC_DIR`, so a real course repo's `instructor/mkdocs/mkdocs.yml` works as-is), builds the engine's site from wherever that config file was found, and copies the result to a fixed path (`/home/cdsw/lab_guide_site`). This fixed path decouples the serving app from engine-specific output directories, so rerunning this job — after switching engines, or after uploading content — never requires restarting the app.
+2. **Build lab guide site** — reads `LAB_GUIDE_SRC_DIR` and `LAB_GUIDE_ENGINE`, searches recursively under `LAB_GUIDE_SRC_DIR` for the matching config file (`mkdocs.yml` or `zensical.toml` — it doesn't have to sit directly inside `LAB_GUIDE_SRC_DIR`, so a real course repo's `instructor/mkdocs/mkdocs.yml` works as-is), builds the engine's site from wherever that config file was found, and copies the result to a fixed path (`/home/cdsw/lab_guide_site`). This fixed path decouples the serving app from engine-specific output directories, so rerunning this job — after switching engines, or after uploading content — never requires restarting the app.
 3. **Lab Guide** (application) — serves `/home/cdsw/lab_guide_site`. If nothing has been built yet, it shows a "guide not built yet" page instead of an error; once a build succeeds, the already-running app serves the real content immediately.
 
 ## Getting your content in
@@ -38,7 +38,7 @@ directly — a Google Doc export, an internal-only repo, etc.
 
 ## Choosing an engine
 
-Set `GUIDE_ENGINE` to `mkdocs` (Material for MkDocs) or `zensical`. Both are fully supported. You can
+Set `LAB_GUIDE_ENGINE` to `mkdocs` (Material for MkDocs) or `zensical`. Both are fully supported. You can
 switch engines at any time and just rerun the **Build lab guide site** job (no need to rerun **Install dependencies**, since both engines are always installed).
 
 ## Environment variables
@@ -46,7 +46,7 @@ switch engines at any time and just rerun the **Build lab guide site** job (no n
 | Variable            | Default     | Description |
 | -------------------- | ----------- | ------------ |
 | `LAB_GUIDE_SRC_DIR`  | `lab_guide` | Path, relative to the project root, to the folder containing your lab guide content. Its `mkdocs.yml`/`zensical.toml` can live directly inside this folder or in any subfolder beneath it (found by recursive search) — exactly one matching config file must exist under this path. |
-| `GUIDE_ENGINE`       | `mkdocs`    | Which static site generator to build with — `mkdocs` or `zensical`. |
+| `LAB_GUIDE_ENGINE`       | `mkdocs`    | Which static site generator to build with — `mkdocs` or `zensical`. |
 
 ## Importing this repo as a Custom AMP in CAI
 
@@ -54,7 +54,7 @@ switch engines at any time and just rerun the **Build lab guide site** job (no n
 2. Choose **Add AMP from Git Repository** (admin access required to
    register a new AMP catalog source, or use your workspace's "Custom AMP" import flow if available).
 3. Paste this repo's URL and select it.
-4. Launch — you'll be prompted for `LAB_GUIDE_SRC_DIR` and `GUIDE_ENGINE` at launch time; the defaults match the shipped example content.
+4. Launch — you'll be prompted for `LAB_GUIDE_SRC_DIR` and `LAB_GUIDE_ENGINE` at launch time; the defaults match the shipped example content.
 
 ## Submitting to the AMP catalog
 

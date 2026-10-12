@@ -1,6 +1,6 @@
 """Build the lab guide (mkdocs or zensical) into a fixed output location.
 
-Reads LAB_GUIDE_SRC_DIR and GUIDE_ENGINE, searches recursively under
+Reads LAB_GUIDE_SRC_DIR and LAB_GUIDE_ENGINE, searches recursively under
 LAB_GUIDE_SRC_DIR for the engine's config file (mkdocs.yml or
 zensical.toml) rather than requiring it directly inside LAB_GUIDE_SRC_DIR
 -- real course repos often nest it a few levels down (e.g.
@@ -41,7 +41,7 @@ def fail(message: str) -> None:
 
 def get_env():
     src_dir_rel = os.environ.get("LAB_GUIDE_SRC_DIR", "lab_guide")
-    engine = (os.environ.get("GUIDE_ENGINE") or "mkdocs").strip().lower()
+    engine = (os.environ.get("LAB_GUIDE_ENGINE") or "mkdocs").strip().lower()
     return src_dir_rel, engine
 
 
@@ -58,8 +58,8 @@ def find_config_matches(src_dir: pathlib.Path, config_filename: str) -> list[pat
 def resolve_config_path(src_dir_rel: str, engine: str) -> pathlib.Path:
     if engine not in ENGINE_CONFIG_FILENAMES:
         fail(
-            f"Unrecognized GUIDE_ENGINE '{engine}'. Must be 'mkdocs' or "
-            f"'zensical'. Set GUIDE_ENGINE to one of these values in the "
+            f"Unrecognized LAB_GUIDE_ENGINE '{engine}'. Must be 'mkdocs' or "
+            f"'zensical'. Set LAB_GUIDE_ENGINE to one of these values in the "
             f"project's environment variables and rerun this job."
         )
 
@@ -96,7 +96,7 @@ def resolve_config_path(src_dir_rel: str, engine: str) -> pathlib.Path:
                 f"problem below is fixed:\n"
                 f"  - Wrong setting: if your lab guide content lives in a "
                 f"different folder, or uses the other engine, fix "
-                f"LAB_GUIDE_SRC_DIR and/or GUIDE_ENGINE in the project's "
+                f"LAB_GUIDE_SRC_DIR and/or LAB_GUIDE_ENGINE in the project's "
                 f"environment variables to match, then rerun this job.\n"
                 f"  - Nested or not uploaded yet: move '{config_filename}' "
                 f"to the top of '{src_dir_rel}' (or upload it there via "
@@ -114,7 +114,7 @@ def resolve_config_path(src_dir_rel: str, engine: str) -> pathlib.Path:
             f"This job is safe to rerun once the problem below is fixed:\n"
             f"  - Wrong setting: if your lab guide content lives in a "
             f"different folder, or uses the other engine, fix "
-            f"LAB_GUIDE_SRC_DIR and/or GUIDE_ENGINE in the project's "
+            f"LAB_GUIDE_SRC_DIR and/or LAB_GUIDE_ENGINE in the project's "
             f"environment variables to match, then rerun this job.\n"
             f"  - Not uploaded yet: if you're following the manual-upload "
             f"path, upload your markdown and '{config_filename}' anywhere "

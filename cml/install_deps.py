@@ -1,7 +1,7 @@
 """Install dependencies for the Lab Guide AMP.
 
 Both supported engines (mkdocs-material and zensical) are installed
-unconditionally, so switching GUIDE_ENGINE later and rerunning only the
+unconditionally, so switching LAB_GUIDE_ENGINE later and rerunning only the
 build job always works without rerunning this one.
 """
 import subprocess
